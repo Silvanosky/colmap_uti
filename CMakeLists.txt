@@ -3,9 +3,10 @@ cmake_minimum_required(VERSION 3.16)
 project(ColmapPrj)
 
 find_package(COLMAP REQUIRED)
+find_package(OpenMP REQUIRED)
 # or to require a specific version: find_package(COLMAP 3.4 REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp  -std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -std=c++17")
 
 include_directories(${COLMAP_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
 link_directories(${COLMAP_LINK_DIRS})
@@ -21,7 +22,6 @@ add_executable(colmap_add_camera colmap_add_camera.cpp)
 add_executable(colmap_export_Rt colmap_export_Rt.cpp)
 add_executable(colmap_init_poses colmap_init_poses.cpp)
 
-
 target_link_libraries(colmap_sfm ${COLMAP_LIBRARIES})
 target_link_libraries(colmap_export_features ${COLMAP_LIBRARIES})
 target_link_libraries(colmap_import_features ${COLMAP_LIBRARIES})
@@ -33,4 +33,15 @@ target_link_libraries(colmap_add_camera ${COLMAP_LIBRARIES})
 target_link_libraries(colmap_export_Rt ${COLMAP_LIBRARIES})
 target_link_libraries(colmap_init_poses ${COLMAP_LIBRARIES})
 
-install(TARGETS colmap_sfm colmap_export_features colmap_import_features colmap_import_features_batch colmap_import_Rt colmap_transfer_features colmap_modify_intrinsics colmap_add_camera colmap_export_Rt colmap_init_poses DESTINATION "bin")
+install(TARGETS
+    colmap_sfm
+    colmap_export_features
+    colmap_import_features
+    colmap_import_features_batch
+    colmap_import_Rt
+    colmap_transfer_features
+    colmap_modify_intrinsics
+    colmap_add_camera
+    colmap_export_Rt
+    colmap_init_poses
+    DESTINATION "bin")
