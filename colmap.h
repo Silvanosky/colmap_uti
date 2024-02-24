@@ -1,24 +1,32 @@
 #include <cstdlib>
 #include <iostream>
 
-#include <colmap/util/option_manager.h>
-#include <colmap/base/database.h> 
-#include <colmap/base/image_reader.h>
+#include <colmap/controllers/option_manager.h>
+#include <colmap/scene/database.h>
+#include <colmap/controllers/image_reader.h>
 #include <colmap/mvs/image.h>
-#include <colmap/base/reconstruction.h>
+#include <colmap/scene/reconstruction.h>
 #include <colmap/util/string.h>
 #include <eigen3/Eigen/Core>
 
-#include "base/similarity_transform.h" 
-#include "controllers/automatic_reconstruction.h"
-#include "controllers/bundle_adjustment.h"
-#include "controllers/hierarchical_mapper.h"
-#include "estimators/coordinate_frame.h"
-#include "feature/extraction.h"
-#include "feature/matching.h"
-#include "feature/utils.h" 
-#include "retrieval/visual_index.h" 
-#include "util/opengl_utils.h"
-#include "util/version.h"
+#include <colmap/scene/camera.h>
+#include <colmap/scene/two_view_geometry.h>
+#include <colmap/estimators/two_view_geometry.h>
+#include <colmap/feature/utils.h>
 
-#include "util/threading.h"
+#include "colmap/estimators/similarity_transform.h"
+#include "colmap/controllers/automatic_reconstruction.h"
+#include "colmap/controllers/bundle_adjustment.h"
+#include "colmap/controllers/hierarchical_mapper.h"
+#include "colmap/estimators/coordinate_frame.h"
+#include "colmap/util/misc.h"
+#include "colmap/feature/sift.h"
+#include "colmap/controllers/feature_extraction.h"
+#include "colmap/controllers/feature_matching.h"
+#include "colmap/controllers/feature_matching_utils.h"
+#include "colmap/controllers/incremental_mapper.h"
+//#include "retrieval/visual_index.h"
+//#include "util/opengl_utils.h"
+//#include "util/version.h"
+
+//#include "util/threading.h"

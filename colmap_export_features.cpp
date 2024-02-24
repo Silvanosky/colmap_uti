@@ -1,7 +1,7 @@
-#include <colmap.h>
 #include <sys/stat.h>
+#include "colmap.h"
 
-using namespace colmap; 
+using namespace colmap;
 
 bool SaveCoords(Database &aDb,std::vector<Image> &aImSet);
 bool SaveTracks(Database &aDb,std::vector<std::pair<image_pair_t,FeatureMatches> > &aMatchSet);
@@ -23,77 +23,74 @@ int main(int argc,char** argv)
     //read the database
     Database database(*options.database_path);
 
-    //read all images  
+    //read all images
     //std::vector<Image> aImSet = database.ReadAllImages();
-    
+
     //read all matches
     std::vector<std::pair<image_pair_t,FeatureMatches> > aMatchSet = database.ReadAllMatches();
-    
+
 
     //save Homol
     if (! (SaveHomol(database,aMatchSet,aSH)))
         return EXIT_FAILURE;
 
 
-    //save as coords 
+    //save as coords
 /*     if (!SaveCoords(&aImSet))
-        return false; 
+        return false;
     //save tracks
     if (!SaveTracks(&aMatchSet))
-        return false; */ 
+        return false; */
     //                                   (first is camera id, second is points id)
     //std::map<int,std::vector<std::pair<int,int> > > aTracks;
     //typedef std::map<int,Pt2dr > tKeyPt;
     //std::map<int,tKeyPt >
-    
+
     return EXIT_SUCCESS;
 }
 
-bool SaveHomol(Database &aDb,std::vector<std::pair<image_pair_t,FeatureMatches> >& aMS,std::string& aSH)
-{
-    std::string aPathHomol = "Homol"+aSH+"/";
-    mkdir(aPathHomol.c_str(),0X7FFFFFFF);
-      
-    for (auto pair : aMS)
-    {
+bool SaveHomol(Database &aDb,
+               std::vector<std::pair<image_pair_t, FeatureMatches> > &aMS,
+               std::string &aSH) {
+    std::string aPathHomol = "Homol" + aSH + "/";
+    mkdir(aPathHomol.c_str(), 0X7FFFFFFF);
 
-        //get images ids and names
-        image_t aImId1, aImId2;
-        Image aIm1,aIm2;
-        aDb.PairIdToImagePair(pair.first,&aImId1,&aImId2);
+    for (auto pair : aMS) {
 
-        aIm1 = aDb.ReadImage(aImId1);
-        aIm2 = aDb.ReadImage(aImId2);
+        const auto image_pair = Database::PairIdToImagePair(pair.first);
+
+        // get images ids and names
+        auto aIm1 = aDb.ReadImage(image_pair.first);
+        auto aIm2 = aDb.ReadImage(image_pair.second);
         std::string aIm1Name = aIm1.Name();
         std::string aIm2Name = aIm2.Name();
 
         std::string slash = "/";
         size_t pos_slash = aIm1Name.find(slash);
 
-        if( pos_slash != std::string::npos)
-        {
+        if (pos_slash != std::string::npos) {
             aIm1Name.replace(pos_slash, slash.size(), "-");
         }
         pos_slash = aIm2Name.find(slash);
-        if( pos_slash != std::string::npos)
-        {
+        if (pos_slash != std::string::npos) {
             aIm2Name.replace(pos_slash, slash.size(), "-");
         }
 
-        //read keypoints
-        FeatureKeypoints aFeatureIm1 = aDb.ReadKeypoints(aImId1);
-        FeatureKeypoints aFeatureIm2 = aDb.ReadKeypoints(aImId2);
-        //std::cout << "Size pts " << aFeatureIm1.size() << " " <<  aFeatureIm2.size() << "\n";
+        // read keypoints
+        FeatureKeypoints aFeatureIm1 = aDb.ReadKeypoints(image_pair.first);
+        FeatureKeypoints aFeatureIm2 = aDb.ReadKeypoints(image_pair.second);
+        // std::cout << "Size pts " << aFeatureIm1.size() << " " <<
+        // aFeatureIm2.size() << "\n";
 
-        //open files for writing
-        std::string aPastis1 = aPathHomol+"Pastis"+aIm1Name;
-        std::string aPastis2 = aPathHomol+"Pastis"+aIm2Name;
+        // open files for writing
+        std::string aPastis1 = aPathHomol + "Pastis" + aIm1Name;
+        std::string aPastis2 = aPathHomol + "Pastis" + aIm2Name;
 
-        mkdir(aPastis1.c_str(),0X7FFFFFFF);
-        mkdir(aPastis2.c_str(),0X7FFFFFFF);
+        mkdir(aPastis1.c_str(), 0X7FFFFFFF);
+        mkdir(aPastis2.c_str(), 0X7FFFFFFF);
 
-        std::string aPathFile12 = aPastis1+"/"+aIm2Name+".txt";
-        std::string aPathFile21 = aPastis2+"/"+aIm1Name+".txt";
+        std::string aPathFile12 = aPastis1 + "/" + aIm2Name + ".txt";
+        std::string aPathFile21 = aPastis2 + "/" + aIm1Name + ".txt";
 
         std::ofstream file12(aPathFile12, std::ios::trunc);
         std::ofstream file21(aPathFile21, std::ios::trunc);
@@ -102,44 +99,39 @@ bool SaveHomol(Database &aDb,std::vector<std::pair<image_pair_t,FeatureMatches> 
         file12.precision(17);
         file21.precision(17);
 
-        
+        for (auto feature : pair.second) {
+            // std::cout << feature.point2D_idx1 << " " << feature.point2D_idx2
+            // <<   "\n"; std::cout << aFeatureIm1[feature.point2D_idx1].x << "
+            // " << aFeatureIm1[feature.point2D_idx1].y << "\n";
 
-        for (auto feature : pair.second)
-        { 
-            //std::cout << feature.point2D_idx1 << " " << feature.point2D_idx2 <<   "\n";
-            //std::cout << aFeatureIm1[feature.point2D_idx1].x << " " << aFeatureIm1[feature.point2D_idx1].y << "\n";
+            file12 << aFeatureIm1[feature.point2D_idx1].x << " "
+                   << aFeatureIm1[feature.point2D_idx1].y << " "
+                   << aFeatureIm2[feature.point2D_idx2].x << " "
+                   << aFeatureIm2[feature.point2D_idx2].y << "\n";
 
-            file12 << aFeatureIm1[feature.point2D_idx1].x << " " << aFeatureIm1[feature.point2D_idx1].y << " " 
-                   << aFeatureIm2[feature.point2D_idx2].x << " " << aFeatureIm2[feature.point2D_idx2].y << "\n";
-
-            file21 << aFeatureIm2[feature.point2D_idx2].x << " " << aFeatureIm2[feature.point2D_idx2].y << " "
-                   << aFeatureIm1[feature.point2D_idx1].x << " " << aFeatureIm1[feature.point2D_idx1].y << "\n";
- 
+            file21 << aFeatureIm2[feature.point2D_idx2].x << " "
+                   << aFeatureIm2[feature.point2D_idx2].y << " "
+                   << aFeatureIm1[feature.point2D_idx1].x << " "
+                   << aFeatureIm1[feature.point2D_idx1].y << "\n";
         }
 
         file12.close();
         file21.close();
 
-
-
         //
-
-
     }
-
-    
 
     return true;
 }
- 
+
 bool SaveCoords(Database &aDb,std::vector<Image> &aImSet)
 {
     std::ofstream file("coords.txt", std::ios::trunc);
     CHECK(file.is_open()) << "coords.txt";
-     
+
     file.precision(17);
 
-    
+
     for (auto aIm : aImSet)
     {
         std::ostringstream line;
@@ -161,7 +153,7 @@ bool SaveCoords(Database &aDb,std::vector<Image> &aImSet)
 
 bool SaveTracks(Database &aDb,std::vector<std::pair<image_pair_t,FeatureMatches> > &aMatchSet)
 {
-    
+
     //
     //number of keypoints
     int aNbKP = aDb.NumMatches();
